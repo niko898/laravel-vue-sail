@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Services\ProcessService;
 
 class FileController extends Controller
 {
@@ -15,7 +16,11 @@ class FileController extends Controller
     {
         $fileName = time().'.'.$request->file->getClientOriginalExtension();
         $request->file->move(public_path('upload'), $fileName);
-              
+
+        if($fileName){
+            ProcessService::setJob(public_path('upload') . '/' . $fileName);
+        }
+          
         return response()->json(['success'=>'You have successfully upload file.']);
     }
 

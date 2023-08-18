@@ -8,7 +8,7 @@ class ProccessController extends Controller
 {
     public function startImport()
     {
-        $import = new ImportService();
-        $import->import();
+        $csv_import = new ImportService();
+        $csv_import->import(public_path('upload') .'/1692363245.csv');
     }
 }
