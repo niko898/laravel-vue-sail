@@ -15,6 +15,7 @@ class ProcessImport implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $filename;
+    public $timeout = 0;
 
     /**
      * Create a new job instance.

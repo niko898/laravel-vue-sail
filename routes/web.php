@@ -17,6 +17,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('formSubmit', '\App\Http\Controllers\FileController@formSubmit');
+Route::post('formSubmit', '\App\Http\Controllers\UploadController@request');
 
 Route::get('start', '\App\Http\Controllers\ProccessController@startImport');

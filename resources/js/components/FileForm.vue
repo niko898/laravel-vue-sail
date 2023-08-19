@@ -3,59 +3,83 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">Laravel Vue JS File Upload Example - ItSolutionStuff.com</div>
+                    <div class="card-header">Lets upload your a large csv file</div>
                     <div class="card-body">
-                        <div v-if="success != ''" class="alert alert-success" role="alert">
-                          {{success}}
+                        <form @submit.prevent="onSubmit">
+                            <fieldset>
+                                <div class="form-group">
+                                    <div class="custom-file">
+                                        <input
+                                            type="file"
+                                            class="custom-file-input"
+                                            id="customFile"
+                                            accept="csv/*"
+                                            ref="fileContainer"
+                                            @change="onChangeFile">
+                                            <label class="custom-file-label" for="customFile" ref="fileLabel">{{ label }}</label>
+                                        </div>
+                                        <div class="my-3 progress">
+                                            <div
+                                                class="progress-bar"
+                                                role="progressbar"
+                                                :style="{ width: progress + '%' }"
+                                                aria-valuenow="25"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100"></div>
+                                        </div>
+                                        <div
+                                            class="my-3 alert alert-primary"
+                                            :class="{ 'd-none': null === result }"
+                                            role="alert">
+                                            <span>{{ result }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </fieldset>
+                            </form>
                         </div>
-                        <form @submit="formSubmit" enctype="multipart/form-data">
-                        <strong>Name:</strong>
-                        <input type="text" class="form-control" v-model="name">
-                        <strong>File:</strong>
-                        <input type="file" class="form-control" v-on:change="onFileChange">
-    
-                        <button class="btn btn-success">Submit</button>
-                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</template>
+    </template>
 
-<script>
-    export default {
-        data() {
-            return {
-              name: '',
-              file: '',
-              success: ''
-            };
-        },
-        methods: {
-            onFileChange(e){
-                console.log(e.target.files[0]);
-                this.file = e.target.files[0];
+    <script>
+        import uploadService from './uploadService.js';
+
+        export default {
+            data() {
+                return {label: 'Choose File', file: null, progress: 0, result: null};
             },
-            formSubmit(e) {
-                e.preventDefault();
-                let currentObj = this;
-   
-                const config = {
-                    headers: { 'content-type': 'multipart/form-data' }
+            methods: {
+                onSubmit() {
+                    if (null !== this.file) {
+                        this.progress = 0;
+                        this.result = null;
+
+                        uploadService.chunk('/formSubmit', this.file, percent => {
+                            this.progress = percent;
+                        }, err => {
+                            console.log(err);
+                        }, res => {
+                            const {data} = res;
+                            this.result = data.result;
+                        });
+                    }
+                },
+                onChangeFile() {
+                    const file = this.$refs.fileContainer.files;
+                    this.file = file.length > 0
+                        ? file[0]
+                        : null;
+                    if (null !== this.file) {
+                        this.label = `${this.file.name}`;
+                    } else {
+                        this.label = 'Choose File';
+                    }
                 }
-    
-                let formData = new FormData();
-                formData.append('file', this.file);
-   
-                axios.post('/formSubmit', formData, config)
-                .then(function (response) {
-                    currentObj.success = response.data.success;
-                })
-                .catch(function (error) {
-                    currentObj.output = error;
-                });
             }
         }
-    }
-</script>
+    </script>
